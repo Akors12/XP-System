@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4a4a4a">
+    <meta name="description" content="XP Habit Tracker - Gamify your productivity">
+    <title>XP Habit Tracker</title>
+    <style>
+         :root {
+            /* Light mode colors */
+            --bg-color: #f8f8f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-light: #666666;
+            --accent-color: #4a4a4a;
+            --border-color: #e0e0e0;
+            --completed-color: #e8f5e9;
+            --hover-color: #f5f5f5;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+            --negative-color: #ff5252;
+            --positive-color: #4caf50;
+            --chart-color-1: #4a6fa5;
+            --chart-color-2: #6a8caf;
+            --chart-color-3: #9c7a97;
+            --chart-color-4: #7a9c7a;
+            /* Difficulty colors */
+            --difficulty-easy: #4caf50;
+            /* Green */
+            --difficulty-normal: #2196F3;
+            /* Blue */
+            --difficulty-medium: #E91E63;
+            /* Pink */
+            --difficulty-hard: #FF9800;
+            /* Orange */
+            --difficulty-expert: #F44336;
+            /* Red */
+            --difficulty-godlike: #FFD700;
+            /* Gold */
+        }
+        /* Dark mode colors */
+        
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --text-light: #a0a0a0;
+            --accent-color: #6a6a6a;
+            --border-color: #3d3d3d;
+            --completed-color: #2e4a2e;
+            --hover-color: #3a3a3a;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --negative-color: #ff6b6b;
+            --positive-color: #66bb6a;
+            --chart-color-1: #5d8fd4;
+            --chart-color-2: #7fa6d1;
+            --chart-color-3: #b98fb5;
+            --chart-color-4: #8fb98f;
+            /* Dark mode difficulty colors */
+            --difficulty-easy: #4caf50;
+            /* Green */
+            --difficulty-normal: #2196F3;
+            /* Blue */
+            --difficulty-medium: #E91E63;
+            /* Pink */
+            --difficulty-hard: #FF9800;
+            /* Orange */
+            --difficulty-expert: #F44336;
+            /* Red */
+            --difficulty-godlike: #FFD700;
+            /* Gold */
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        h1 {
+            font-size: 2rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .xp-display {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+        
+        .level-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .level-up {
+            animation: levelUp 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        @keyframes levelUp {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .xp-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .xp-bar-container {
+            flex: 1;
+            height: 16px;
+            background-color: var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .xp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), #333333);
+            border-radius: 8px;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        .xp-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 0.75rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            scrollbar-width: none;
+        }
+        
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.25rem;
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .tab:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .tab.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .task-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .task-item {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+        }
+        
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-item.completed {
+            background-color: var(--completed-color);
+            border-color: var(--positive-color);
+        }
+        
+        .task-item.negative {
+            border-left: 4px solid var(--negative-color);
+        }
+        
+        .task-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .task-checkbox {
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+            accent-color: var(--accent-color);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .task-name {
+            flex: 1;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        
+        .task-xp {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .task-xp.positive {
+            color: var(--positive-color);
+        }
+        
+        .task-xp.negative {
+            color: var(--negative-color);
+        }
+        
+        .task-footer {
+            display: flex;
+            align-items: center;
+            margin-top: 0.75rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .task-category {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .task-difficulty {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .difficulty-easy {
+            background-color: var(--difficulty-easy);
+        }
+        
+        .difficulty-normal {
+            background-color: var(--difficulty-normal);
+        }
+        
+        .difficulty-medium {
+            background-color: var(--difficulty-medium);
+        }
+        
+        .difficulty-hard {
+            background-color: var(--difficulty-hard);
+        }
+        
+        .difficulty-expert {
+            background-color: var(--difficulty-expert);
+        }
+        
+        .difficulty-godlike {
+            background-color: var(--difficulty-godlike);
+        }
+        
+        .task-notes {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .form-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            transition: var(--transition);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(74, 74, 74, 0.2);
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .button-secondary {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .button-secondary:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .button-danger {
+            background-color: var(--negative-color);
+        }
+        
+        .button-danger:hover {
+            background-color: #e53935;
+        }
+        
+        .reward-item {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        
+        .reward-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .reward-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .reward-cost {
+            font-weight: 600;
+            color: var(--difficulty-godlike);
+            font-size: 1.1rem;
+        }
+        
+        .reward-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+        
+        .reward-notes {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .reward-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .mark-indicator {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        /* Calendar Styles */
+        
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .calendar th {
+            padding: 0.75rem;
+            text-align: center;
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .calendar td {
+            padding: 0.5rem;
+            height: 100px;
+            vertical-align: top;
+            border: 1px solid var(--border-color);
+            position: relative;
+            background-color: var(--card-bg);
+        }
+        
+        .calendar-day {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .calendar-today {
+            background-color: var(--hover-color);
+        }
+        
+        .calendar-task {
+            font-size: 0.75rem;
+            padding: 0.1rem 0.25rem;
+            margin-bottom: 0.1rem;
+            border-radius: 3px;
+            background-color: var(--chart-color-1);
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        /* Statistics Styles */
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-tabs {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .stat-tab.active {
+            border-bottom: 2px solid var(--accent-color);
+            font-weight: 500;
+        }
+        /* Dark mode toggle button */
+        
+        #darkModeToggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent-color);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        #darkModeToggle:hover {
+            transform: scale(1.1);
+        }
+        /* Modal styles */
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        .reward-option {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .reward-option:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+        }
+        
+        .reward-option.selected {
+            border-color: var(--positive-color);
+            background-color: var(--completed-color);
+        }
+        
+        .reward-option h4 {
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .reward-option p {
+            margin: 0;
+            color: var(--text-light);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .task-list {
+                grid-template-columns: 1fr;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .calendar td {
+                height: 80px;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>XP Habit Tracker</h1>
+            <div class="runner-points">
+                <span id="runnerPointsDisplay">0</span> Runes
+            </div>
+        </header>
+
+        <div class="xp-display">
+            <div class="level-display" id="levelDisplay">
+                <span>Level 1</span>
+            </div>
+            <div class="xp-progress-container">
+                <div class="xp-bar-container">
+                    <div class="xp-bar" id="xpBar"></div>
+                </div>
+                <div class="xp-text" id="xpText">0/100 XP</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total XP</div>
+                    <div class="stat-value" id="totalXP">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Tasks Done</div>
+                    <div class="stat-value" id="tasksCompleted">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">To Next Level</div>
+                    <div class="stat-value" id="xpToNext">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Productivity</div>
+                    <div class="stat-value" id="productivityScore">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab active" onclick="openTab('tasks')">Tasks</button>
+            <button class="tab" onclick="openTab('assignments')">Assignments</button>
+            <button class="tab" onclick="openTab('rewards')">Rewards</button>
+            <button class="tab" onclick="openTab('calendar')">Calendar</button>
+            <button class="tab" onclick="openTab('statistics')">Statistics</button>
+            <button class="tab" onclick="openTab('addTask')">Add Task</button>
+            <button class="tab" onclick="openTab('addAssignment')">Add Assignment</button>
+            <button class="tab" onclick="openTab('addReward')">Add Reward</button>
+            <button class="tab" onclick="openTab('settings')">Settings</button>
+        </div>
+
+        <div id="tasks" class="tab-content active">
+            <div class="actions-bar">
+                <div class="tabs-container">
+                    <button class="tab active" onclick="openTaskTab('main')">Main</button>
+                    <button class="tab" onclick="openTaskTab('side')">Side</button>
+                    <button class="tab" onclick="openTaskTab('special')">Special</button>
+                    <button class="tab" onclick="openTaskTab('daily')">Daily</button>
+                    <button class="tab" onclick="openTaskTab('weekly')">Weekly</button>
+                </div>
+                <button class="button-secondary" onclick="deleteCompletedTasks()">Delete Completed</button>
+            </div>
+
+            <div id="main-tasks" class="task-tab-content active">
+                <h3>Main Quests</h3>
+                <ul class="task-list" id="mainTaskList"></ul>
+            </div>
+
+            <div id="side-tasks" class="task-tab-content">
+                <h3>Side Quests</h3>
+                <ul class="task-list" id="sideTaskList"></ul>
+            </div>
+
+            <div id="special-tasks" class="task-tab-content">
+                <h3>Special Quests</h3>
+                <ul class="task-list" id="specialTaskList"></ul>
+            </div>
+
+            <div id="daily-tasks" class="task-tab-content">
+                <h3>Daily Quests</h3>
+                <ul class="task-list" id="dailyTaskList"></ul>
+            </div>
+
+            <div id="weekly-tasks" class="task-tab-content">
+                <h3>Weekly Quests</h3>
+                <ul class="task-list" id="weeklyTaskList"></ul>
+            </div>
+        </div>
+
+        <div id="assignments" class="tab-content">
+            <h2>Assignments</h2>
+            <ul class="task-list" id="assignmentList"></ul>
+        </div>
+
+        <div id="rewards" class="tab-content">
+            <h2>Rewards Shop</h2>
+            <div id="rewardsList"></div>
+        </div>
+
+        <div id="calendar" class="tab-content form-container">
+            <h2>Task Calendar</h2>
+            <div class="calendar-nav">
+                <button onclick="changeMonth(-1)">Previous</button>
+                <h3 id="current-month">Month Year</h3>
+                <button onclick="changeMonth(1)">Next</button>
+            </div>
+            <table class="calendar" id="calendar-table">
+                <thead>
+                    <tr>
+                        <th>Sun</th>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body"></tbody>
+            </table>
+        </div>
+
+        <div id="statistics" class="tab-content form-container">
+            <h2>Statistics</h2>
+            <div class="stat-tabs">
+                <div class="stat-tab active" onclick="showStatTab('weekly')">Weekly</div>
+                <div class="stat-tab" onclick="showStatTab('monthly')">Monthly</div>
+                <div class="stat-tab" onclick="showStatTab('category')">By Category</div>
+            </div>
+
+            <div id="weekly-stats" class="stat-tab-content active">
+                <h3>Weekly Progress</h3>
+                <div class="chart-container">
+                    <canvas id="weekly-chart"></canvas>
+                </div>
+            </div>
+
+            <div id="monthly-stats" class="stat-tab-content">
+                <h3>Monthly Progress</h3>
+                <div class="chart-container">
+                    <canvas id="monthly-chart"></canvas>
+                </div>
+            </div>
+
+            <div id="category-stats" class="stat-tab-content">
+                <h3>Category Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="category-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="addTask" class="tab-content form-container">
+            <h2>Add New Task</h2>
+            <form id="taskForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="taskName">Task Name</label>
+                        <input type="text" id="taskName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskCategory">Category</label>
+                        <select id="taskCategory" required>
+                            <option value="main">Main Quest</option>
+                            <option value="side">Side Quest</option>
+                            <option value="special">Special Quest</option>
+                            <option value="daily">Daily Quest</option>
+                            <option value="weekly">Weekly Quest</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskXP">XP Value (number only)</label>
+                        <input type="number" id="taskXP" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date (optional)</label>
+                        <input type="date" id="taskDueDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskNotes">Notes (optional)</label>
+                        <textarea id="taskNotes"></textarea>
+                    </div>
+                    <div class="form-group" id="dependencies-group" style="display: none;">
+                        <label>Dependencies</label>
+                        <div class="dependency-list" id="dependency-list"></div>
+                    </div>
+                </div>
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+
+        <div id="addAssignment" class="tab-content form-container">
+            <h2>Add New Assignment</h2>
+            <form id="assignmentForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="assignmentName">Assignment Name</label>
+                        <input type="text" id="assignmentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentClass">Class</label>
+                        <input type="text" id="assignmentClass" placeholder="Enter class name">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentPoints">Points (1-15)</label>
+                        <select id="assignmentPoints">
+                            <option value="15">15 Points (1+)</option>
+                            <option value="14">14 Points (1)</option>
+                            <option value="13">13 Points (1-)</option>
+                            <option value="12">12 Points (2+)</option>
+                            <option value="11">11 Points (2)</option>
+                            <option value="10">10 Points (2-)</option>
+                            <option value="9">9 Points (3+)</option>
+                            <option value="8">8 Points (3)</option>
+                            <option value="7">7 Points (3-)</option>
+                            <option value="6">6 Points (4+)</option>
+                            <option value="5">5 Points (4)</option>
+                            <option value="4">4 Points (4-)</option>
+                            <option value="3">3 Points (5+)</option>
+                            <option value="2">2 Points (5)</option>
+                            <option value="1">1 Point (5-)</option>
+                            <option value="0">0 Points (6)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentDescription">Description</label>
+                        <input type="text" id="assignmentDescription">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentDueDate">Due Date</label>
+                        <input type="date" id="assignmentDueDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignmentNotes">Notes (optional)</label>
+                        <textarea id="assignmentNotes"></textarea>
+                    </div>
+                </div>
+                <button type="submit">Add Assignment</button>
+            </form>
+        </div>
+
+        <div id="addReward" class="tab-content form-container">
+            <h2>Add New Reward</h2>
+            <form id="rewardForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="rewardName">Reward Name</label>
+                        <input type="text" id="rewardName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rewardCost">Runes Cost</label>
+                        <input type="number" id="rewardCost" min="1" value="50" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rewardDescription">Description</label>
+                        <input type="text" id="rewardDescription">
+                    </div>
+                    <div class="form-group">
+                        <label for="rewardNotes">Notes (optional)</label>
+                        <textarea id="rewardNotes"></textarea>
+                    </div>
+                </div>
+                <button type="submit">Add Reward</button>
+            </form>
+        </div>
+
+        <div id="settings" class="tab-content form-container">
+            <h2>Settings & Data</h2>
+
+            <h3>Task Dependencies</h3>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="enable-dependencies">
+                    Enable Task Dependencies
+                </label>
+            </div>
+
+            <h3>Data Management</h3>
+            <div class="form-group">
+                <button onclick="exportData()">Export All Data</button>
+                <button onclick="importData()">Import Data</button>
+                <input type="file" id="import-file" style="display: none;">
+            </div>
+
+            <div class="data-actions">
+                <button class="button-danger" onclick="clearData()">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+    <button id="darkModeToggle">🌙</button>
+
+    <!-- Level Up Reward Modal -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Level Up Reward!</h3>
+                <button class="close-modal" onclick="closeRewardModal()">&times;</button>
+            </div>
+            <p>Congratulations on reaching level <span id="rewardModalLevel">1</span>! Choose your reward:</p>
+            <div id="rewardOptions"></div>
+            <button onclick="claimReward()" style="margin-top: 1rem;">Claim Reward</button>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode Functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+        // Check for saved theme preference or use system preference
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = prefersDarkScheme.matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                darkModeToggle.textContent = '☀️';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                darkModeToggle.textContent = '🌙';
+            }
+        }
+
+        // Toggle theme
+        darkModeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                darkModeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                darkModeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Initialize theme
+        initTheme();
+
+        // Watch for system preference changes
+        prefersDarkScheme.addEventListener('change', e => {
+            if (!localStorage.getItem('theme')) {
+                if (e.matches) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    darkModeToggle.textContent = '☀️';
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    darkModeToggle.textContent = '🌙';
+                }
+            }
+        });
+
+        // Game State
+        let gameState = {
+            xp: 0,
+            level: 1,
+            tasksCompleted: 0,
+            runes: 0,
+            tasks: [],
+            assignments: [],
+            rewards: [],
+            settings: {
+                dependenciesEnabled: false
+            },
+            lastDailyReset: null,
+            lastWeeklyReset: null
+        };
+
+        // Calendar state
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        // Chart instances
+        let weeklyChart, monthlyChart, categoryChart;
+
+        // Level up reward modal state
+        let selectedRewardId = null;
+        let currentLevelForReward = 1;
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGameState();
+            checkDailyReset();
+            checkWeeklyReset();
+            renderTasks();
+            renderAssignments();
+            renderRewards();
+            renderCalendar();
+            updateUI();
+            setupEventListeners();
+
+            // Load Chart.js if needed
+            loadChartJS();
+        });
+
+        function setupEventListeners() {
+            // Form event listeners
+            document.getElementById('taskForm').addEventListener('submit', addTask);
+            document.getElementById('assignmentForm').addEventListener('submit', addAssignment);
+            document.getElementById('rewardForm').addEventListener('submit', addReward);
+
+            // Settings
+            document.getElementById('enable-dependencies').addEventListener('change', function() {
+                gameState.settings.dependenciesEnabled = this.checked;
+                saveGameState();
+                toggleDependenciesUI();
+            });
+
+            // Import file
+            document.getElementById('import-file').addEventListener('change', handleFileImport);
+        }
+
+        function loadChartJS() {
+            if (typeof Chart === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.onload = function() {
+                    renderCharts();
+                };
+                document.head.appendChild(script);
+            } else {
+                renderCharts();
+            }
+        }
+
+        // Check and reset daily tasks if needed
+        function checkDailyReset() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+
+            if (!gameState.lastDailyReset || gameState.lastDailyReset !== today) {
+                // Reset daily tasks
+                gameState.tasks = gameState.tasks.map(task => {
+                    if (task.category === 'daily') {
+                        return {...task,
+                            completed: false
+                        };
+                    }
+                    return task;
+                });
+
+                gameState.lastDailyReset = today;
+                saveGameState();
+                renderTasks();
+            }
+        }
+
+        // Check and reset weekly tasks if needed
+        function checkWeeklyReset() {
+            const now = new Date();
+            const startOfWeek = getStartOfWeek(now);
+            const weekKey = startOfWeek.toISOString().split('T')[0];
+
+            if (!gameState.lastWeeklyReset || gameState.lastWeeklyReset !== weekKey) {
+                // Reset weekly tasks
+                gameState.tasks = gameState.tasks.map(task => {
+                    if (task.category === 'weekly') {
+                        return {...task,
+                            completed: false
+                        };
+                    }
+                    return task;
+                });
+
+                gameState.lastWeeklyReset = weekKey;
+                saveGameState();
+                renderTasks();
+            }
+        }
+
+        // Get start of week (Monday)
+        function getStartOfWeek(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+            return new Date(d.setDate(diff));
+        }
+
+        // XP Requirements (scaling with level)
+        function getXPRequirement(level) {
+            if (level <= 10) {
+                return level * 100;
+            } else {
+                return 1000 + (level - 10) * 200;
+            }
+        }
+
+        // Difficulty based on XP
+        function getDifficulty(xp) {
+            xp = Math.abs(xp);
+            if (xp < 5) return "easy";
+            if (xp < 10) return "normal";
+            if (xp < 15) return "medium";
+            if (xp < 25) return "hard";
+            if (xp < 35) return "expert";
+            return "godlike";
+        }
+
+        // Get difficulty label
+        function getDifficultyLabel(difficulty) {
+            const labels = {
+                'easy': "Easy",
+                'normal': "Normal",
+                'medium': "Medium",
+                'hard': "Hard",
+                'expert': "Expert",
+                'godlike': "Godlike"
+            };
+            return labels[difficulty] || difficulty;
+        }
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const savedState = localStorage.getItem('xpGameState');
+            if (savedState) {
+                gameState = JSON.parse(savedState);
+            } else {
+                // Initialize with empty arrays if no saved state
+                gameState = {
+                    xp: 0,
+                    level: 1,
+                    tasksCompleted: 0,
+                    runes: 0,
+                    tasks: [],
+                    assignments: [],
+                    rewards: [],
+                    settings: {
+                        dependenciesEnabled: false
+                    },
+                    lastDailyReset: null,
+                    lastWeeklyReset: null
+                };
+            }
+
+            // Initialize settings if not present
+            if (!gameState.settings) {
+                gameState.settings = {
+                    dependenciesEnabled: false
+                };
+            }
+
+            // Initialize reset tracking if not present
+            if (!gameState.lastDailyReset) {
+                gameState.lastDailyReset = null;
+            }
+            if (!gameState.lastWeeklyReset) {
+                gameState.lastWeeklyReset = null;
+            }
+
+            // Update UI based on settings
+            document.getElementById('enable-dependencies').checked = gameState.settings.dependenciesEnabled;
+            toggleDependenciesUI();
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('xpGameState', JSON.stringify(gameState));
+        }
+
+        // Toggle dependencies UI
+        function toggleDependenciesUI() {
+            const dependenciesGroup = document.getElementById('dependencies-group');
+            dependenciesGroup.style.display = gameState.settings.dependenciesEnabled ? 'block' : 'none';
+
+            if (gameState.settings.dependenciesEnabled) {
+                updateDependenciesList();
+            }
+        }
+
+        // Update dependencies list
+        function updateDependenciesList() {
+            const list = document.getElementById('dependency-list');
+            list.innerHTML = '';
+
+            gameState.tasks.forEach(task => {
+                if (!task.completed) {
+                    const item = document.createElement('div');
+                    item.className = 'dependency-item';
+                    item.innerHTML = `
+                        <input type="checkbox" class="dependency-checkbox" id="dep-${task.id}">
+                        <label for="dep-${task.id}">${task.name}</label>
+                    `;
+                    list.appendChild(item);
+                }
+            });
+
+            if (list.children.length === 0) {
+                list.innerHTML = '<p>No incomplete tasks available</p>';
+            }
+        }
+
+        // Update all UI elements
+        function updateUI() {
+            // Calculate XP requirements
+            const currentLevelXP = gameState.level > 1 ? getXPRequirement(gameState.level - 1) : 0;
+            const nextLevelXP = getXPRequirement(gameState.level);
+            const xpForCurrentLevel = gameState.xp - currentLevelXP;
+            const xpNeededForLevel = nextLevelXP - currentLevelXP;
+            const xpPercentage = Math.min(100, Math.max(0, (xpForCurrentLevel / xpNeededForLevel) * 100));
+
+            // Update XP bar
+            const xpBar = document.getElementById('xpBar');
+            xpBar.style.width = `${xpPercentage}%`;
+            document.getElementById('xpText').textContent = `${xpForCurrentLevel}/${xpNeededForLevel} XP`;
+
+            // Update level display
+            document.getElementById('levelDisplay').innerHTML = `<span>Level ${gameState.level}</span>`;
+
+            // Update stats
+            document.getElementById('totalXP').textContent = gameState.xp;
+            document.getElementById('tasksCompleted').textContent = gameState.tasksCompleted;
+            document.getElementById('xpToNext').textContent = xpNeededForLevel - xpForCurrentLevel;
+            document.getElementById('runnerPointsDisplay').textContent = gameState.runes;
+
+            // Calculate productivity score (percentage of completed daily tasks)
+            const dailyTasks = gameState.tasks.filter(task => task.category === 'daily');
+            const completedDaily = dailyTasks.filter(task => task.completed).length;
+            const productivityScore = dailyTasks.length > 0 ? Math.round((completedDaily / dailyTasks.length) * 100) : 0;
+            document.getElementById('productivityScore').textContent = `${productivityScore}%`;
+        }
+
+        // Render all tasks
+        function renderTasks() {
+            renderTaskList('main');
+            renderTaskList('side');
+            renderTaskList('special');
+            renderTaskList('daily');
+            renderTaskList('weekly');
+
+            if (gameState.settings.dependenciesEnabled) {
+                updateDependenciesList();
+            }
+        }
+
+        // Render a specific task list
+        function renderTaskList(category) {
+            const listElement = document.getElementById(`${category}TaskList`);
+            if (!listElement) return;
+
+            listElement.innerHTML = '';
+
+            let filteredTasks = gameState.tasks.filter(task => task.category === category);
+
+            if (filteredTasks.length === 0) {
+                listElement.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>No ${category} tasks yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort tasks by XP (lowest first) within each category
+            filteredTasks.sort((a, b) => Math.abs(a.xp) - Math.abs(b.xp));
+
+            filteredTasks.forEach(task => {
+                        const li = document.createElement('li');
+                        li.className = `task-item ${task.completed ? 'completed' : ''} ${task.xp < 0 ? 'negative' : ''}`;
+
+                        let notesHtml = '';
+                        if (task.notes) {
+                            notesHtml = `<div class="task-notes">${task.notes}</div>`;
+                        }
+
+                        li.innerHTML = `
+                    <div class="task-header">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                        <span class="task-name">${task.name}</span>
+                        <span class="task-xp ${task.xp >= 0 ? 'positive' : 'negative'}">${task.xp >= 0 ? '+' : ''}${task.xp} XP</span>
+                    </div>
+                    <div class="task-footer">
+                        <span class="task-category">${getCategoryLabel(task.category)}</span>
+                        <span class="task-difficulty difficulty-${task.difficulty}">${getDifficultyLabel(task.difficulty)}</span>
+                        ${task.dueDate ? `<span class="task-category">Due: ${formatDate(task.dueDate)}</span>` : ''}
+                    </div>
+                    ${notesHtml}
+                `;
+                
+                li.querySelector('.task-checkbox').addEventListener('change', () => toggleTaskCompletion(task.id));
+                listElement.appendChild(li);
+            });
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        // Get category label
+        function getCategoryLabel(category) {
+            const labels = {
+                'main': "Main Quest",
+                'side': "Side Quest",
+                'special': "Special Quest",
+                'daily': "Daily Quest",
+                'weekly': "Weekly Quest"
+            };
+            return labels[category] || category;
+        }
+
+        // Render assignments
+        function renderAssignments() {
+            const listElement = document.getElementById('assignmentList');
+            listElement.innerHTML = '';
+            
+            if (gameState.assignments.length === 0) {
+                listElement.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <p>No assignments yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort assignments by due date (soonest first)
+            const sortedAssignments = [...gameState.assignments].sort((a, b) => {
+                if (!a.dueDate && !b.dueDate) return 0;
+                if (!a.dueDate) return 1;
+                if (!b.dueDate) return -1;
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
+            
+            sortedAssignments.forEach(assignment => {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                
+                let classBadge = '';
+                if (assignment.class) {
+                    classBadge = `<span class="task-category">${assignment.class}</span>`;
+                }
+                
+                let pointsBadge = '';
+                if (assignment.points !== undefined) {
+                    pointsBadge = `<span class="mark-indicator">${getMarkFromPoints(assignment.points)}</span>`;
+                }
+                
+                let dueDateText = '';
+                if (assignment.dueDate) {
+                    const dueDate = new Date(assignment.dueDate);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    const timeDiff = dueDate - today;
+                    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                    
+                    let dueText;
+                    if (daysDiff === 0) dueText = "Today";
+                    else if (daysDiff === 1) dueText = "Tomorrow";
+                    else if (daysDiff < 0) dueText = `${Math.abs(daysDiff)} days overdue`;
+                    else dueText = `In ${daysDiff} days`;
+                    
+                    dueDateText = `
+                        <div class="task-footer">
+                            ${classBadge}
+                            ${pointsBadge}
+                            <span class="task-difficulty difficulty-hard">${dueText}</span>
+                        </div>
+                    `;
+                }
+                
+                let notesHtml = '';
+                if (assignment.notes) {
+                    notesHtml = `<div class="task-notes">${assignment.notes}</div>`;
+                }
+                
+                li.innerHTML = `
+                    <div class="task-header">
+                        <span class="task-name">${assignment.name}</span>
+                    </div>
+                    ${assignment.description ? `<p style="margin: 0.5rem 0; color: var(--text-light);">${assignment.description}</p>` : ''}
+                    ${notesHtml}
+                    ${dueDateText}
+                `;
+                
+                listElement.appendChild(li);
+            });
+        }
+
+        // Convert points to German school marks
+        function getMarkFromPoints(points) {
+            points = parseInt(points);
+            if (points === 15) return "1+";
+            if (points === 14) return "1";
+            if (points === 13) return "1-";
+            if (points === 12) return "2+";
+            if (points === 11) return "2";
+            if (points === 10) return "2-";
+            if (points === 9) return "3+";
+            if (points === 8) return "3";
+            if (points === 7) return "3-";
+            if (points === 6) return "4+";
+            if (points === 5) return "4";
+            if (points === 4) return "4-";
+            if (points === 3) return "5+";
+            if (points === 2) return "5";
+            if (points === 1) return "5-";
+            return "6";
+        }
+
+        // Render rewards
+        function renderRewards() {
+            const rewardsList = document.getElementById('rewardsList');
+            rewardsList.innerHTML = '';
+            
+            if (gameState.rewards.length === 0) {
+                rewardsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎁</div>
+                        <p>No rewards yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort rewards by cost (ascending)
+            const sortedRewards = [...gameState.rewards].sort((a, b) => a.cost - b.cost);
+            
+            sortedRewards.forEach(reward => {
+                const rewardItem = document.createElement('div');
+                rewardItem.className = 'reward-item';
+                
+                let notesHtml = '';
+                if (reward.notes) {
+                    notesHtml = `<div class="reward-notes">${reward.notes}</div>`;
+                }
+                
+                rewardItem.innerHTML = `
+                    <div class="reward-header">
+                        <h3>${reward.name}</h3>
+                        <span class="reward-cost">${reward.cost} Runes</span>
+                    </div>
+                    ${reward.description ? `<p class="reward-description">${reward.description}</p>` : ''}
+                    ${notesHtml}
+                    <div class="reward-actions">
+                        <button onclick="buyReward('${reward.id}')">Purchase</button>
+                        <button class="button-secondary" onclick="editReward('${reward.id}')">Edit</button>
+                        <button class="button-danger" onclick="deleteReward('${reward.id}')">Delete</button>
+                    </div>
+                `;
+                
+                rewardsList.appendChild(rewardItem);
+            });
+        }
+
+        // Calendar functionality
+        function renderCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+            
+            document.getElementById('current-month').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+            
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            
+            let calendarBody = document.getElementById('calendar-body');
+            calendarBody.innerHTML = '';
+            
+            let date = 1;
+            const today = new Date();
+            
+            for (let i = 0; i < 6; i++) {
+                if (date > daysInMonth) break;
+                
+                const row = document.createElement('tr');
+                
+                for (let j = 0; j < 7; j++) {
+                    if (i === 0 && j < firstDay.getDay()) {
+                        const cell = document.createElement('td');
+                        row.appendChild(cell);
+                    } else if (date > daysInMonth) {
+                        const cell = document.createElement('td');
+                        row.appendChild(cell);
+                    } else {
+                        const cell = document.createElement('td');
+                        if (currentYear === today.getFullYear() && 
+                            currentMonth === today.getMonth() && 
+                            date === today.getDate()) {
+                            cell.classList.add('calendar-today');
+                        }
+                        
+                        cell.innerHTML = `<div class="calendar-day">${date}</div>`;
+                        
+                        // Add tasks for this day
+                        const tasks = gameState.tasks.filter(task => {
+                            if (!task.dueDate) return false;
+                            const taskDate = new Date(task.dueDate);
+                            return taskDate.getDate() === date && 
+                                   taskDate.getMonth() === currentMonth && 
+                                   taskDate.getFullYear() === currentYear;
+                        });
+                        
+                        tasks.forEach(task => {
+                            const taskEl = document.createElement('div');
+                            taskEl.className = 'calendar-task';
+                            taskEl.textContent = task.name;
+                            taskEl.style.backgroundColor = getCategoryColor(task.category);
+                            cell.appendChild(taskEl);
+                        });
+                        
+                        row.appendChild(cell);
+                        date++;
+                    }
+                }
+                
+                calendarBody.appendChild(row);
+            }
+        }
+
+        function changeMonth(offset) {
+            currentMonth += offset;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function getCategoryColor(category) {
+            const colors = {
+                'main': 'var(--chart-color-1)',
+                'side': 'var(--chart-color-2)',
+                'special': 'var(--chart-color-3)',
+                'daily': 'var(--chart-color-4)',
+                'weekly': 'var(--chart-color-2)'
+            };
+            return colors[category] || '#cccccc';
+        }
+
+        // Statistics functionality
+        function showStatTab(tabName) {
+            document.querySelectorAll('.stat-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.stat-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(`${tabName}-stats`).classList.add('active');
+            document.querySelector(`.stat-tab[onclick="showStatTab('${tabName}')"]`).classList.add('active');
+            
+            renderCharts();
+        }
+
+        function renderCharts() {
+            if (typeof Chart === 'undefined') return;
+            
+            // Weekly chart
+            const weeklyCtx = document.getElementById('weekly-chart').getContext('2d');
+            const weeklyData = getWeeklyData();
+            
+            if (weeklyChart) weeklyChart.destroy();
+            weeklyChart = new Chart(weeklyCtx, {
+                type: 'bar',
+                data: weeklyData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            
+            // Monthly chart
+            const monthlyCtx = document.getElementById('monthly-chart').getContext('2d');
+            const monthlyData = getMonthlyData();
+            
+            if (monthlyChart) monthlyChart.destroy();
+            monthlyChart = new Chart(monthlyCtx, {
+                type: 'line',
+                data: monthlyData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            
+            // Category chart
+            const categoryCtx = document.getElementById('category-chart').getContext('2d');
+            const categoryData = getCategoryData();
+            
+            if (categoryChart) categoryChart.destroy();
+            categoryChart = new Chart(categoryCtx, {
+                type: 'pie',
+                data: categoryData,
+                options: {
+                    responsive: true
+                }
+            });
+        }
+
+        function getWeeklyData() {
+            // Calculate XP per day for the current week
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 = Sunday
+            const startDate = new Date(now);
+            startDate.setDate(now.getDate() - dayOfWeek);
+            
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const xpData = [0, 0, 0, 0, 0, 0, 0];
+            
+            gameState.tasks.forEach(task => {
+                if (task.completed && task.dueDate) {
+                    const taskDate = new Date(task.dueDate);
+                    const diffInDays = Math.floor((taskDate - startDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (diffInDays >= 0 && diffInDays < 7) {
+                        xpData[diffInDays] += task.xp;
+                    }
+                }
+            });
+            
+            return {
+                labels: days,
+                datasets: [{
+                    label: 'XP Earned',
+                    data: xpData,
+                    backgroundColor: '#4a4a4a'
+                }]
+            };
+        }
+
+        function getMonthlyData() {
+            // Calculate XP per week for the current month
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            const weeksInMonth = Math.ceil((lastDay.getDate() + firstDay.getDay()) / 7);
+            
+            const weekLabels = [];
+            const xpData = [];
+            
+            for (let i = 0; i < weeksInMonth; i++) {
+                weekLabels.push(`Week ${i + 1}`);
+                xpData.push(0);
+            }
+            
+            gameState.tasks.forEach(task => {
+                if (task.completed && task.dueDate) {
+                    const taskDate = new Date(task.dueDate);
+                    if (taskDate.getMonth() === now.getMonth() && 
+                        taskDate.getFullYear() === now.getFullYear()) {
+                        const week = Math.floor((taskDate.getDate() + firstDay.getDay() - 1) / 7);
+                        xpData[week] += task.xp;
+                    }
+                }
+            });
+            
+            return {
+                labels: weekLabels,
+                datasets: [{
+                    label: 'XP Earned',
+                    data: xpData,
+                    borderColor: '#4a4a4a',
+                    fill: false
+                }]
+            };
+        }
+
+        function getCategoryData() {
+            const categories = {
+                'main': 0,
+                'side': 0,
+                'special': 0,
+                'daily': 0,
+                'weekly': 0
+            };
+            
+            gameState.tasks.forEach(task => {
+                if (task.completed) {
+                    categories[task.category] += task.xp;
+                }
+            });
+            
+            return {
+                labels: Object.keys(categories),
+                datasets: [{
+                    data: Object.values(categories),
+                    backgroundColor: [
+                        getCategoryColor('main'),
+                        getCategoryColor('side'),
+                        getCategoryColor('special'),
+                        getCategoryColor('daily'),
+                        getCategoryColor('weekly')
+                    ]
+                }]
+            };
+        }
+
+        // Add a new task
+        function addTask(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('taskName').value;
+            const category = document.getElementById('taskCategory').value;
+            const xp = parseInt(document.getElementById('taskXP').value);
+            const dueDate = document.getElementById('taskDueDate').value;
+            const notes = document.getElementById('taskNotes').value;
+            const difficulty = getDifficulty(xp);
+            
+            // Get dependencies if enabled
+            const dependencies = [];
+            if (gameState.settings.dependenciesEnabled) {
+                document.querySelectorAll('#dependency-list input:checked').forEach(checkbox => {
+                    const taskId = checkbox.id.replace('dep-', '');
+                    dependencies.push(taskId);
+                });
+            }
+            
+            const newTask = {
+                id: generateId(),
+                name,
+                category,
+                xp,
+                difficulty,
+                completed: false,
+                dueDate,
+                dependencies,
+                notes,
+                createdAt: new Date().toISOString()
+            };
+            
+            gameState.tasks.push(newTask);
+            saveGameState();
+            renderTasks();
+            document.getElementById('taskForm').reset();
+            openTab('tasks');
+        }
+
+        // Add a new assignment
+        function addAssignment(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('assignmentName').value;
+            const description = document.getElementById('assignmentDescription').value;
+            const dueDate = document.getElementById('assignmentDueDate').value;
+            const assignmentClass = document.getElementById('assignmentClass').value;
+            const points = document.getElementById('assignmentPoints').value;
+            const notes = document.getElementById('assignmentNotes').value;
+            
+            const newAssignment = {
+                id: generateId(),
+                name,
+                description,
+                dueDate,
+                class: assignmentClass,
+                points: parseInt(points),
+                notes,
+                createdAt: new Date().toISOString()
+            };
+            
+            gameState.assignments.push(newAssignment);
+            saveGameState();
+            renderAssignments();
+            document.getElementById('assignmentForm').reset();
+            openTab('assignments');
+        }
+
+        // Add a new reward
+        function addReward(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('rewardName').value;
+            const cost = parseInt(document.getElementById('rewardCost').value);
+            const description = document.getElementById('rewardDescription').value;
+            const notes = document.getElementById('rewardNotes').value;
+            
+            const newReward = {
+                id: generateId(),
+                name,
+                cost,
+                description,
+                notes
+            };
+            
+            gameState.rewards.push(newReward);
+            saveGameState();
+            renderRewards();
+            document.getElementById('rewardForm').reset();
+            openTab('rewards');
+        }
+
+        // Edit reward
+        function editReward(rewardId) {
+            const reward = gameState.rewards.find(r => r.id === rewardId);
+            if (!reward) return;
+            
+            document.getElementById('rewardName').value = reward.name;
+            document.getElementById('rewardCost').value = reward.cost;
+            document.getElementById('rewardDescription').value = reward.description || '';
+            document.getElementById('rewardNotes').value = reward.notes || '';
+            
+            // Remove the reward
+            gameState.rewards = gameState.rewards.filter(r => r.id !== rewardId);
+            saveGameState();
+            
+            openTab('addReward');
+        }
+
+        // Delete reward
+        function deleteReward(rewardId) {
+            if (confirm('Are you sure you want to delete this reward?')) {
+                gameState.rewards = gameState.rewards.filter(r => r.id !== rewardId);
+                saveGameState();
+                renderRewards();
+            }
+        }
+
+        // Delete completed tasks
+        function deleteCompletedTasks() {
+            if (confirm('Are you sure you want to delete all completed tasks?')) {
+                gameState.tasks = gameState.tasks.filter(task => !task.completed);
+                saveGameState();
+                renderTasks();
+            }
+        }
+
+        // Toggle task completion
+        function toggleTaskCompletion(taskId) {
+            const taskIndex = gameState.tasks.findIndex(task => task.id === taskId);
+            
+            if (taskIndex !== -1) {
+                const task = gameState.tasks[taskIndex];
+                
+                // Check if task has incomplete dependencies
+                if (gameState.settings.dependenciesEnabled && !task.completed) {
+                    const incompleteDeps = task.dependencies.filter(depId => {
+                        const depTask = gameState.tasks.find(t => t.id === depId);
+                        return depTask && !depTask.completed;
+                    });
+                    
+                    if (incompleteDeps.length > 0) {
+                        alert('Complete the dependencies first!');
+                        document.querySelector(`#${taskId}-checkbox`).checked = false;
+                        return;
+                    }
+                }
+                
+                const wasCompleted = task.completed;
+                task.completed = !wasCompleted;
+                
+                if (task.completed && !wasCompleted) {
+                    // Task was just completed - add XP
+                    gameState.xp += task.xp;
+                    gameState.tasksCompleted++;
+                    
+                    // Special quests give Runes
+                    if (task.category === 'special') {
+                        gameState.runes += Math.floor(Math.abs(task.xp) / 5);
+                    }
+                    
+                    // Check for level up
+                    checkLevelUp();
+                } else if (!task.completed && wasCompleted) {
+                    // Task was unchecked - remove XP
+                    gameState.xp -= task.xp;
+                    gameState.tasksCompleted--;
+                    
+                    // Special quests remove Runes
+                    if (task.category === 'special') {
+                        gameState.runes -= Math.floor(Math.abs(task.xp) / 5);
+                    }
+                }
+                
+                saveGameState();
+                renderTasks();
+                updateUI();
+            }
+        }
+
+        // Buy a reward
+        function buyReward(rewardId) {
+            const reward = gameState.rewards.find(r => r.id === rewardId);
+            if (!reward) return;
+            
+            if (gameState.runes >= reward.cost) {
+                gameState.runes -= reward.cost;
+                saveGameState();
+                updateUI();
+                
+                // Show confirmation
+                alert(`You purchased "${reward.name}" for ${reward.cost} Runes!`);
+            } else {
+                alert(`You need ${reward.cost - gameState.runes} more Runes to purchase this reward.`);
+            }
+        }
+
+        // Check if player leveled up
+        function checkLevelUp() {
+            const nextLevelXP = getXPRequirement(gameState.level);
+            
+            if (gameState.xp >= nextLevelXP) {
+                gameState.level++;
+                currentLevelForReward = gameState.level;
+                
+                // Add level up animation
+                const levelDisplay = document.getElementById('levelDisplay');
+                levelDisplay.classList.add('level-up');
+                setTimeout(() => {
+                    levelDisplay.classList.remove('level-up');
+                }, 800);
+                
+                // Award runes for leveling up - fixed calculation
+                const runesEarned = Math.floor(10); // More reasonable scaling
+                gameState.runes += runesEarned;
+                
+                // Show notification
+                alert(`Level Up! You reached level ${gameState.level} and earned ${runesEarned} Runes!`);
+                
+                saveGameState();
+                updateUI();
+                
+                // Check for additional level ups (in case of large XP gains)
+                checkLevelUp();
+            }
+        }
+
+        // Data export/import
+        function exportData() {
+            const dataStr = JSON.stringify(gameState);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportName = 'xp-habit-tracker-data_' + new Date().toISOString().slice(0,10) + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportName);
+            linkElement.click();
+        }
+
+        function importData() {
+            document.getElementById('import-file').click();
+        }
+
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm('This will overwrite your current data. Continue?')) {
+                        gameState = data;
+                        saveGameState();
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert('Error reading file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearData() {
+            if (confirm('This will permanently delete all your data. Are you sure?')) {
+                localStorage.removeItem('xpGameState');
+                location.reload();
+            }
+        }
+
+        // Tab navigation
+        function openTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tabs-container .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activate tab button
+            const tabButtons = document.querySelectorAll('.tabs-container .tab');
+            for (let i = 0; i < tabButtons.length; i++) {
+                if (tabButtons[i].textContent.toLowerCase().includes(tabName.toLowerCase())) {
+                    tabButtons[i].classList.add('active');
+                    break;
+                }
+            }
+            
+            // If opening tasks tab, show main tasks by default
+            if (tabName === 'tasks') {
+                openTaskTab('main');
+            }
+            
+            // Refresh charts when opening statistics
+            if (tabName === 'statistics' && typeof Chart !== 'undefined') {
+                renderCharts();
+            }
+            
+            // Refresh calendar when opening it
+            if (tabName === 'calendar') {
+                renderCalendar();
+            }
+        }
+
+        // Task tab navigation
+        function openTaskTab(tabName) {
+            // Hide all task tab contents
+            document.querySelectorAll('.task-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all task tabs
+            document.querySelectorAll('#tasks .tabs-container .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activate selected task tab
+            document.getElementById(`${tabName}-tasks`).classList.add('active');
+            
+            // Activate tab button
+            const tabButtons = document.querySelectorAll('#tasks .tabs-container .tab');
+            for (let i = 0; i < tabButtons.length; i++) {
+                if (tabButtons[i].textContent.toLowerCase().includes(tabName.toLowerCase())) {
+                    tabButtons[i].classList.add('active');
+                    break;
+                }
+            }
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+    </script>
+</body>
+
+</html>
